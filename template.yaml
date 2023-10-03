@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sample SAM Template DIMKA9910
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.github.dimka9910.helloworld.App::handleRequest
+      Runtime: java11
+      CodeUri: HelloWorldFunction/
+      MemorySize: 256
+      Timeout: 6
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+          REGION_NAME: !Ref AWS::Region
+      Events:
+        HelloWorldSAMAPI:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: POST
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Canary10Percent10Minutes
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+  Table:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: greeting
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
